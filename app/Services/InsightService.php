@@ -7,7 +7,7 @@ use App\Repositories\InsightRepository;
 class InsightService
 {
     protected $llmClient;
-    protected $insightRepository;
+    protected InsightRepository $insightRepository;
 
     public function __construct(InsightRepository $insightRepository, $llmClient = null)
     {
@@ -15,7 +15,7 @@ class InsightService
         $this->llmClient = $llmClient;
     }
 
-    public function gerarInsight($licitacaoId, $licitacaoData, $orgaoData)
+    public function gerarInsight(int $licitacaoId, array $licitacaoData, array $orgaoData): mixed
     {
         $resumo = $this->gerarResumo($licitacaoData['objeto']);
         $palavrasChave = $this->extrairPalavrasChave($licitacaoData['objeto']);
@@ -33,25 +33,25 @@ class InsightService
         return $this->insightRepository->saveOrUpdate($licitacaoId, $insight);
     }
 
-    public function gerarResumo($objeto)
+    public function gerarResumo(string $objeto): string
     {
         // Simulação de LLM - em produção, chamar API real
         return substr($objeto, 0, 200) . '...';
     }
 
-    public function extrairPalavrasChave($texto)
+    public function extrairPalavrasChave(string $texto): array
     {
         // Simulação simples
         return ['licitação', 'contrato', 'serviços'];
     }
 
-    public function classificarSetor($objeto)
+    public function classificarSetor(string $objeto): string
     {
         // Simulação
         return 'Serviços Gerais';
     }
 
-    public function calcularScoreOportunidade($licitacaoData, $orgaoData)
+    public function calcularScoreOportunidade(array $licitacaoData, array $orgaoData): int
     {
         // Lógica simples baseada em valor
         $valor = $licitacaoData['valor_estimado'] ?? 0;
@@ -61,7 +61,7 @@ class InsightService
         return 4;
     }
 
-    public function validarInsight($insight)
+    public function validarInsight(array $insight): bool
     {
         return !empty($insight['resumo']) && isset($insight['oportunidade_score']);
     }

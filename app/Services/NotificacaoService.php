@@ -8,9 +8,9 @@ use App\Repositories\LicitacaoRepository;
 
 class NotificacaoService
 {
-    protected $alertaRepo;
-    protected $notificacaoRepo;
-    protected $licitacaoRepo;
+    protected AlertaRepository $alertaRepo;
+    protected NotificacaoRepository $notificacaoRepo;
+    protected LicitacaoRepository $licitacaoRepo;
 
     public function __construct(
         AlertaRepository $alertaRepo,
@@ -22,7 +22,7 @@ class NotificacaoService
         $this->licitacaoRepo = $licitacaoRepo;
     }
 
-    public function verificarAlertas($licitacaoId)
+    public function verificarAlertas(int $licitacaoId)
     {
         $licitacao = $this->licitacaoRepo->findById($licitacaoId);
         if (!$licitacao) return;
@@ -36,7 +36,7 @@ class NotificacaoService
         }
     }
 
-    public function criarNotificacao($usuarioId, $alertaId, $licitacaoId)
+    public function criarNotificacao(int $usuarioId, int $alertaId, int $licitacaoId): mixed
     {
         $licitacao = $this->licitacaoRepo->findById($licitacaoId);
         $titulo = "Nova licitação: {$licitacao['objeto']}";

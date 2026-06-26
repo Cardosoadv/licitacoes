@@ -13,12 +13,12 @@ class LicitacaoRepository extends BaseRepository
         $this->model = new LicitacaoModel();
     }
 
-    public function findWithOrgaoAndInsight($id)
+    public function findWithOrgaoAndInsight(int $id): array | null
     {
         return $this->model->withOrgao()->withInsight()->find($id);
     }
 
-    public function findByFilters($filters, $perPage = 20, $page = 1)
+    public function findByFilters(array $filters, int $perPage = 20, int $page = 1): array
     {
         $query = $this->model;
 
@@ -45,27 +45,27 @@ class LicitacaoRepository extends BaseRepository
         return $query->paginate($perPage, 'default', $page);
     }
 
-    public function getEstatisticasGerais()
+    public function getEstatisticasGerais(): array
     {
         return $this->model->select('COUNT(*) as total, SUM(valor_estimado) as valor_total')
                           ->first();
     }
 
-    public function getDistribuicaoSituacao()
+    public function getDistribuicaoSituacao(): array
     {
         return $this->model->select('situacao, COUNT(*) as quantidade')
                           ->groupBy('situacao')
                           ->findAll();
     }
 
-    public function getDistribuicaoModalidade()
+    public function getDistribuicaoModalidade(): array
     {
         return $this->model->select('modalidade, COUNT(*) as quantidade')
                           ->groupBy('modalidade')
                           ->findAll();
     }
 
-    public function getOrgaosMaisAtivos($limit = 10)
+    public function getOrgaosMaisAtivos(int $limit = 10): array
     {
         return $this->model->select('orgaos.nome, COUNT(*) as quantidade')
                           ->join('orgaos', 'orgaos.id = licitacoes.orgao_id')
@@ -74,18 +74,18 @@ class LicitacaoRepository extends BaseRepository
                           ->findAll($limit);
     }
 
-    public function findNovasLicitacoes($since = null)
+    public function findNovasLicitacoes(?string $since = null): array
     {
         $query = $this->model->where('created_at >', $since ?? date('Y-m-d H:i:s', strtotime('-7 days')));
         return $query->findAll();
     }
 
-    public function updateByCodigoPNCP($codigo, $data)
+    public function updateByCodigoPNCP(string $codigo, array $data): bool
     {
         return $this->model->where('codigo_pncp', $codigo)->set($data)->update();
     }
 
-    public function findByCodigoPNCP($codigo)
+    public function findByCodigoPNCP(string $codigo): array
     {
         return $this->model->where('codigo_pncp', $codigo)->first();
     }

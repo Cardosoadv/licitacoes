@@ -7,13 +7,13 @@ use App\Services\AuthService;
 
 class AlertaController extends BaseController
 {
-    protected $alertaRepo;
-    protected $authService;
+    protected AlertaRepository $alertaRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected AuthService $authService;
 
-    public function __construct()
+    public function __construct(?AlertaRepository $alertaRepo=null, ?AuthService $authService=null)
     {
-        $this->alertaRepo = new AlertaRepository();
-        $this->authService = new AuthService(session());
+        $this->alertaRepo = $alertaRepo ?? new AlertaRepository();
+        $this->authService = $authService ?? new AuthService(session());
     }
 
     /**

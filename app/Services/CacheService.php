@@ -6,14 +6,14 @@ use CodeIgniter\Cache\CacheInterface;
 
 class CacheService
 {
-    protected $cache;
+    protected CacheInterface $cache;
 
     public function __construct(CacheInterface $cache)
     {
         $this->cache = $cache;
     }
 
-    public function remember($key, $callback, $ttl = 3600)
+    public function remember(string $key, callable $callback, int $ttl = 3600): mixed
     {
         if ($this->cache->get($key)) {
             return $this->cache->get($key);
@@ -24,22 +24,22 @@ class CacheService
         return $value;
     }
 
-    public function get($key)
+    public function get(string $key): mixed
     {
         return $this->cache->get($key);
     }
 
-    public function set($key, $value, $ttl = 3600)
+    public function set(string $key, mixed $value, int $ttl = 3600): bool
     {
         return $this->cache->save($key, $value, $ttl);
     }
 
-    public function delete($key)
+    public function delete(string $key): bool
     {
         return $this->cache->delete($key);
     }
 
-    public function clear($pattern = null)
+    public function clear(?string $pattern = null) : bool
     {
         // Implementar limpeza por padrão se necessário
         return $this->cache->clean();

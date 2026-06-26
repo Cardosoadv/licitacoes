@@ -9,17 +9,17 @@ use App\Services\InsightService;
 
 class LicitacaoController extends BaseController
 {
-    protected $licitacaoRepo;
-    protected $orgaoRepo;
-    protected $insightRepo;
-    protected $insightService;
+    protected LicitacaoRepository $licitacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected OrgaoRepository $orgaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected InsightRepository $insightRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected InsightService $insightService; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
 
-    public function __construct()
+    public function __construct(?LicitacaoRepository $licitacaoRepo=null, ?OrgaoRepository $orgaoRepo=null, ?InsightRepository $insightRepo=null, ?InsightService $insightService=null)
     {
-        $this->licitacaoRepo = new LicitacaoRepository();
-        $this->orgaoRepo = new OrgaoRepository();
-        $this->insightRepo = new InsightRepository();
-        $this->insightService = new InsightService($this->insightRepo);
+        $this->licitacaoRepo = $licitacaoRepo ?? new LicitacaoRepository();
+        $this->orgaoRepo = $orgaoRepo ?? new OrgaoRepository();
+        $this->insightRepo = $insightRepo ?? new InsightRepository();
+        $this->insightService = $insightService ?? new InsightService($this->insightRepo);
     }
 
     public function index()

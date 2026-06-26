@@ -8,12 +8,12 @@ use App\Repositories\SincronizacaoRepository;
 
 class SyncService
 {
-    protected $pncpClient;
-    protected $licitacaoRepo;
-    protected $orgaoRepo;
-    protected $insightService;
-    protected $notificacaoService;
-    protected $syncRepo;
+    protected PNCPClientService $pncpClient;
+    protected LicitacaoRepository $licitacaoRepo;
+    protected OrgaoRepository $orgaoRepo;
+    protected InsightService $insightService;
+    protected NotificacaoService $notificacaoService;
+    protected SincronizacaoRepository $syncRepo;
 
     public function __construct(
         PNCPClientService $pncpClient,
@@ -31,7 +31,7 @@ class SyncService
         $this->syncRepo = $syncRepo;
     }
 
-    public function sincronizarLicitacoes($diasRetroativos = 7)
+    public function sincronizarLicitacoes(int $diasRetroativos = 7): bool
     {
         $syncId = $this->syncRepo->startSync('licitacoes');
  
@@ -81,7 +81,7 @@ class SyncService
         }
     }
 
-    public function processarLicitacao($licitacaoData)
+    public function processarLicitacao(array $licitacaoData): void
     {
         // Mapeamento de campos da API V1 para o modelo interno
         $cnpj = $licitacaoData['orgaoEntidade']['cnpj'] ?? '';
@@ -124,7 +124,7 @@ class SyncService
 
         // Gerar insight (se houver serviço de LLM configurado)
         try {
-            $this->insightService->gerarInsight($codigoPNCP, $dadosFormatados, $orgao);
+            $this->insightService->gerarInsight($codigoPNCP, $dadosFormatados, $orgaoData);
         } catch (\Exception $e) {
             // Logar erro mas não interromper a sincronização
         }

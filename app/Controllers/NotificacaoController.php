@@ -7,13 +7,13 @@ use App\Services\AuthService;
 
 class NotificacaoController extends BaseController
 {
-    protected $notificacaoRepo;
-    protected $authService;
+    protected NotificacaoRepository $notificacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected AuthService $authService;
 
-    public function __construct()
+    public function __construct(?NotificacaoRepository $notificacaoRepo=null, ?AuthService $authService=null)
     {
-        $this->notificacaoRepo = new NotificacaoRepository();
-        $this->authService = new AuthService(session());
+        $this->notificacaoRepo = $notificacaoRepo ?? new NotificacaoRepository();
+        $this->authService = $authService ?? new AuthService(session());
     }
 
     /**

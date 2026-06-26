@@ -13,12 +13,12 @@ class SincronizacaoRepository extends BaseRepository
         $this->model = new SincronizacaoModel();
     }
 
-    public function findLastSync($tipo = 'licitacoes')
+    public function findLastSync(string $tipo = 'licitacoes'): array|null
     {
         return $this->model->where('tipo', $tipo)->orderBy('data_inicio', 'DESC')->first();
     }
 
-    public function startSync($tipo)
+    public function startSync(string $tipo): int|string
     {
         return $this->model->insert([
             'tipo' => $tipo,
@@ -27,14 +27,14 @@ class SincronizacaoRepository extends BaseRepository
         ]);
     }
 
-    public function endSync($id, $status, $data)
+    public function endSync(int $id, string $status, array $data): bool
     {
         $data['data_fim'] = date('Y-m-d H:i:s');
         $data['status'] = $status;
         return $this->model->update($id, $data);
     }
 
-    public function logError($id, $message)
+    public function logError(int $id, string $message): bool
     {
         return $this->model->update($id, [
             'status' => 'erro',

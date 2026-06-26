@@ -13,24 +13,24 @@ class AlertaRepository extends BaseRepository
         $this->model = new AlertaModel();
     }
 
-    public function findByUsuario($usuarioId)
+    public function findByUsuario(int $usuarioId): array
     {
         return $this->model->where('usuario_id', $usuarioId)->findAll();
     }
 
-    public function findActiveByUsuario($usuarioId)
+    public function findActiveByUsuario(int $usuarioId): array
     {
         return $this->model->where('usuario_id', $usuarioId)->where('ativo', true)->findAll();
     }
 
-    public function findAlertasParaNotificacao($licitacao)
+    public function findAlertasParaNotificacao(array $licitacao): array
     {
         // Implementar lógica complexa para matching de alertas
         // Por simplicidade, retornar todos ativos por enquanto
-        return $this->findActiveByUsuario(null); // Ajustar conforme necessário
+        return $this->findActiveByUsuario(0); // Ajustar conforme necessário
     }
 
-    public function updateUltimaNotificacao($alertaId)
+    public function updateUltimaNotificacao(int $alertaId): bool
     {
         return $this->model->update($alertaId, ['ultima_notificacao' => date('Y-m-d H:i:s')]);
     }

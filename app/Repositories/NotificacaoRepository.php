@@ -13,22 +13,22 @@ class NotificacaoRepository extends BaseRepository
         $this->model = new NotificacaoModel();
     }
 
-    public function findNaoLidasByUsuario($usuarioId)
+    public function findNaoLidasByUsuario(int $usuarioId): array
     {
         return $this->model->where('usuario_id', $usuarioId)->where('lida', false)->findAll();
     }
 
-    public function marcarComoLida($id)
+    public function marcarComoLida(int $id): bool
     {
         return $this->model->update($id, ['lida' => true]);
     }
 
-    public function marcarTodasComoLidas($usuarioId)
+    public function marcarTodasComoLidas(int $usuarioId): bool
     {
         return $this->model->where('usuario_id', $usuarioId)->set(['lida' => true])->update();
     }
 
-    public function findByUsuario($usuarioId, $limit = 50)
+    public function findByUsuario(int $usuarioId, int $limit = 50): array
     {
         return $this->model->where('usuario_id', $usuarioId)->orderBy('created_at', 'DESC')->findAll($limit);
     }

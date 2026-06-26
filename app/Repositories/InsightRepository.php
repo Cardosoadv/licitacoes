@@ -13,12 +13,12 @@ class InsightRepository extends BaseRepository
         $this->model = new InsightModel();
     }
 
-    public function findByLicitacaoId($licitacaoId)
+    public function findByLicitacaoId(int $licitacaoId): array | null
     {
         return $this->model->where('licitacao_id', $licitacaoId)->first();
     }
 
-    public function saveOrUpdate($licitacaoId, $insightData)
+    public function saveOrUpdate(int $licitacaoId, array $insightData): bool
     {
         $existing = $this->findByLicitacaoId($licitacaoId);
         if ($existing) {
@@ -29,7 +29,7 @@ class InsightRepository extends BaseRepository
         }
     }
 
-    public function deleteByLicitacaoId($licitacaoId)
+    public function deleteByLicitacaoId(int $licitacaoId): bool
     {
         return $this->model->where('licitacao_id', $licitacaoId)->delete();
     }

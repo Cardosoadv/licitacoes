@@ -9,17 +9,17 @@ use App\Services\AuthService;
 
 class ApiController extends BaseController
 {
-    protected $licitacaoRepo;
-    protected $alertaRepo;
-    protected $notificacaoRepo;
-    protected $authService;
+    protected LicitacaoRepository $licitacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected AlertaRepository $alertaRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected NotificacaoRepository $notificacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected AuthService $authService;
 
-    public function __construct()
+    public function __construct(?LicitacaoRepository $licitacaoRepo=null, ?AlertaRepository $alertaRepo=null, ?NotificacaoRepository $notificacaoRepo=null, ?AuthService $authService=null)
     {
-        $this->licitacaoRepo = new LicitacaoRepository();
-        $this->alertaRepo = new AlertaRepository();
-        $this->notificacaoRepo = new NotificacaoRepository();
-        $this->authService = new AuthService(session());
+        $this->licitacaoRepo = $licitacaoRepo ?? new LicitacaoRepository();
+        $this->alertaRepo = $alertaRepo ?? new AlertaRepository();
+        $this->notificacaoRepo = $notificacaoRepo ?? new NotificacaoRepository();
+        $this->authService = $authService ?? new AuthService(session());
     }
 
     public function licitacoes()
