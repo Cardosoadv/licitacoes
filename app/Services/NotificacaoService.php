@@ -66,6 +66,31 @@ class NotificacaoService
         // Implementar envio semanal
     }
 
+    public function findById($id)
+    {
+        return $this->notificacaoRepo->findById($id);
+    }
+
+    public function findByUsuario($userId)
+    {
+        return $this->notificacaoRepo->findByUsuario($userId);
+    }
+
+    public function marcarComoLida($id)
+    {
+        return $this->notificacaoRepo->marcarComoLida($id);
+    }
+
+    public function marcarTodasComoLidas($userId)
+    {
+        return $this->notificacaoRepo->marcarTodasComoLidas($userId);
+    }
+
+    public function findNaoLidasByUsuario($userId)
+    {
+        return $this->notificacaoRepo->findNaoLidasByUsuario($userId);
+    }
+
     public function alertaCorresponde($alerta, $licitacao, $orgao)
     {
         // Lógica de matching simplificada

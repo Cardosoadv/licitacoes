@@ -73,3 +73,10 @@
 - **Validação de Autorização:** Criados métodos auxiliares `findAlertaOrFail` e `findNotificacaoOrFail` para reaproveitar a validação de acesso às entidades vinculadas ao usuário logado, respeitando o princípio DRY (Don't Repeat Yourself).
 - **Correção de Bug de Segurança:** Adicionada validação de autenticação ausente no método `AlertaController::criar()`.
 - **Atualização de Versão:** Versão do sistema em `README.md` e `composer.json` atualizada para a `v1.0.1`.
+
+## Code Health e Refatoração (v1.0.2)
+- **Criação de Serviços:** Criados os serviços `AlertaService`, `LicitacaoService` e `OrgaoService` para encapsular a lógica de acesso a dados.
+- **Ampliação de Serviços:** Adicionados os métodos que faltavam em `NotificacaoService` para delegar chamadas ao `NotificacaoRepository`.
+- **Limpeza de Controllers:** Resolvidos os "TODOs" (código não limpo) removendo o acesso direto a repositórios nos controllers.
+- **Atualização de Dependências:** `AlertaController`, `LicitacaoController`, `ApiController` e `NotificacaoController` passaram a injetar e utilizar Serviços em vez de Repositórios.
+- **Atualização de Versão:** Versão do sistema atualizada para `v1.0.2` em `README.md` e `composer.json`.

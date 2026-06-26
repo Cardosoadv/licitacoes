@@ -2,17 +2,17 @@
 
 namespace App\Controllers;
 
-use App\Repositories\AlertaRepository;
+use App\Services\AlertaService;
 use App\Services\AuthService;
 
 class AlertaController extends BaseController
 {
-    protected AlertaRepository $alertaRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected AlertaService $alertaService;
     protected AuthService $authService;
 
-    public function __construct(?AlertaRepository $alertaRepo=null, ?AuthService $authService=null)
+    public function __construct(?AlertaService $alertaService=null, ?AuthService $authService=null)
     {
-        $this->alertaRepo = $alertaRepo ?? new AlertaRepository();
+        $this->alertaService = $alertaService ?? new AlertaService();
         $this->authService = $authService ?? new AuthService(session());
     }
 
@@ -30,7 +30,7 @@ class AlertaController extends BaseController
      */
     protected function findAlertaOrFail($id, $userId)
     {
-        $alerta = $this->alertaRepo->findById($id);
+        $alerta = $this->alertaService->findById($id);
 
         if (!$alerta || $alerta['usuario_id'] != $userId) {
             return null;
@@ -42,7 +42,7 @@ class AlertaController extends BaseController
     public function index()
     {
         $user = $this->requireUser();
-        $alertas = $this->alertaRepo->findByUsuario($user->id);
+        $alertas = $this->alertaService->findByUsuario($user->id);
 
         return $this->render('alertas/index', ['alertas' => $alertas]);
     }
@@ -50,7 +50,7 @@ class AlertaController extends BaseController
     public function listar()
     {
         $user = $this->requireUser();
-        $alertas = $this->alertaRepo->findByUsuario($user->id);
+        $alertas = $this->alertaService->findByUsuario($user->id);
 
         return $this->respondSuccess('Alertas listados', $alertas);
     }
@@ -67,7 +67,7 @@ class AlertaController extends BaseController
         $data = $this->request->getJSON(true);
         $data['usuario_id'] = $user->id;
 
-        $id = $this->alertaRepo->create($data);
+        $id = $this->alertaService->create($data);
 
         return $this->respondSuccess('Alerta criado', ['id' => $id]);
     }
@@ -94,7 +94,7 @@ class AlertaController extends BaseController
         }
 
         $data = $this->request->getJSON(true);
-        $this->alertaRepo->update($id, $data);
+        $this->alertaService->update($id, $data);
 
         return $this->respondSuccess('Alerta atualizado');
     }
@@ -108,7 +108,7 @@ class AlertaController extends BaseController
             return $this->respondError('Alerta não encontrado', 404);
         }
 
-        $this->alertaRepo->delete($id);
+        $this->alertaService->delete($id);
 
         return $this->respondSuccess('Alerta deletado');
     }
@@ -123,7 +123,7 @@ class AlertaController extends BaseController
         }
 
         $ativo = !$alerta['ativo'];
-        $this->alertaRepo->update($id, ['ativo' => $ativo]);
+        $this->alertaService->update($id, ['ativo' => $ativo]);
 
         return $this->respondSuccess('Alerta ' . ($ativo ? 'ativado' : 'desativado'));
     }

@@ -1,6 +1,6 @@
 {
     "name": "petys/sistema-gestao-veterinaria",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Sistema de gestão para clínicas e pet shops: agenda, prontuários, faturamento e relatórios financeiros. Desenvolvido em CodeIgniter 4 com padrão MVCRS.",
     "keywords": ["veterinaria", "petshop", "gestao", "codeigniter4", "php", "mvcrs"],
     "license": "MIT",

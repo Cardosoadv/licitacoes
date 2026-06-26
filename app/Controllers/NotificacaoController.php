@@ -2,17 +2,21 @@
 
 namespace App\Controllers;
 
-use App\Repositories\NotificacaoRepository;
+use App\Services\NotificacaoService;
 use App\Services\AuthService;
 
 class NotificacaoController extends BaseController
 {
-    protected NotificacaoRepository $notificacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected NotificacaoService $notificacaoService;
     protected AuthService $authService;
 
-    public function __construct(?NotificacaoRepository $notificacaoRepo=null, ?AuthService $authService=null)
+    public function __construct(?NotificacaoService $notificacaoService=null, ?AuthService $authService=null)
     {
-        $this->notificacaoRepo = $notificacaoRepo ?? new NotificacaoRepository();
+        $this->notificacaoService = $notificacaoService ?? new NotificacaoService(
+            new \App\Repositories\AlertaRepository(),
+            new \App\Repositories\NotificacaoRepository(),
+            new \App\Repositories\LicitacaoRepository()
+        );
         $this->authService = $authService ?? new AuthService(session());
     }
 
@@ -30,7 +34,7 @@ class NotificacaoController extends BaseController
      */
     protected function findNotificacaoOrFail($id, $userId)
     {
-        $notificacao = $this->notificacaoRepo->findById($id);
+        $notificacao = $this->notificacaoService->findById($id);
 
         if (!$notificacao || $notificacao['usuario_id'] != $userId) {
             return null;
@@ -42,7 +46,7 @@ class NotificacaoController extends BaseController
     public function index()
     {
         $user = $this->requireUser();
-        $notificacoes = $this->notificacaoRepo->findByUsuario($user->id);
+        $notificacoes = $this->notificacaoService->findByUsuario($user->id);
 
         return $this->render('notificacoes/index', ['notificacoes' => $notificacoes]);
     }
@@ -56,7 +60,7 @@ class NotificacaoController extends BaseController
             return $this->respondError('Notificação não encontrada', 404);
         }
 
-        $this->notificacaoRepo->marcarComoLida($id);
+        $this->notificacaoService->marcarComoLida($id);
 
         return $this->respondSuccess('Notificação marcada como lida');
     }
@@ -64,7 +68,7 @@ class NotificacaoController extends BaseController
     public function marcarTodasLidas()
     {
         $user = $this->requireUser();
-        $this->notificacaoRepo->marcarTodasComoLidas($user->id);
+        $this->notificacaoService->marcarTodasComoLidas($user->id);
 
         return $this->respondSuccess('Todas as notificações foram marcadas como lidas');
     }
@@ -73,7 +77,7 @@ class NotificacaoController extends BaseController
     {
         $user = $this->requireUser();
 
-        $naoLidas = $this->notificacaoRepo->findNaoLidasByUsuario($user->id);
+        $naoLidas = $this->notificacaoService->findNaoLidasByUsuario($user->id);
         $count = count($naoLidas);
 
         return $this->respondSuccess('Contagem obtida', ['count' => $count]);

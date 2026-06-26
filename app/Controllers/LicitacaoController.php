@@ -2,33 +2,31 @@
 
 namespace App\Controllers;
 
-use App\Repositories\LicitacaoRepository;
-use App\Repositories\OrgaoRepository;
-use App\Repositories\InsightRepository;
+use App\Services\LicitacaoService;
+use App\Services\OrgaoService;
 use App\Services\InsightService;
 
 class LicitacaoController extends BaseController
 {
-    protected LicitacaoRepository $licitacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
-    protected OrgaoRepository $orgaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
-    protected InsightRepository $insightRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
-    protected InsightService $insightService; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected LicitacaoService $licitacaoService;
+    protected OrgaoService $orgaoService;
+    protected InsightService $insightService;
 
-    public function __construct(?LicitacaoRepository $licitacaoRepo=null, ?OrgaoRepository $orgaoRepo=null, ?InsightRepository $insightRepo=null, ?InsightService $insightService=null)
+    public function __construct(?LicitacaoService $licitacaoService=null, ?OrgaoService $orgaoService=null, ?InsightService $insightService=null)
     {
-        $this->licitacaoRepo = $licitacaoRepo ?? new LicitacaoRepository();
-        $this->orgaoRepo = $orgaoRepo ?? new OrgaoRepository();
-        $this->insightRepo = $insightRepo ?? new InsightRepository();
-        $this->insightService = $insightService ?? new InsightService($this->insightRepo);
+        $this->licitacaoService = $licitacaoService ?? new LicitacaoService();
+        $this->orgaoService = $orgaoService ?? new OrgaoService();
+        $this->insightService = $insightService ?? new InsightService(new \App\Repositories\InsightRepository());
     }
+
 
     public function index()
     {
         $stats = [
-            'gerais' => $this->licitacaoRepo->getEstatisticasGerais(),
-            'situacao' => $this->licitacaoRepo->getDistribuicaoSituacao(),
-            'modalidade' => $this->licitacaoRepo->getDistribuicaoModalidade(),
-            'orgaos' => $this->licitacaoRepo->getOrgaosMaisAtivos(5),
+            'gerais' => $this->licitacaoService->getEstatisticasGerais(),
+            'situacao' => $this->licitacaoService->getDistribuicaoSituacao(),
+            'modalidade' => $this->licitacaoService->getDistribuicaoModalidade(),
+            'orgaos' => $this->licitacaoService->getOrgaosMaisAtivos(5),
         ];
 
         return $this->render('licitacoes/index', [
@@ -43,18 +41,18 @@ class LicitacaoController extends BaseController
         $page = $this->request->getGet('page') ?? 1;
         $perPage = 20;
 
-        $licitacoes = $this->licitacaoRepo->findByFilters($filters, $perPage, $page);
+        $licitacoes = $this->licitacaoService->findByFilters($filters, $perPage, $page);
 
         return $this->render('licitacoes/listar', [
             'licitacoes' => $licitacoes,
-            'pager' => $this->licitacaoRepo->getPager(),
+            'pager' => $this->licitacaoService->getPager(),
             'filters' => $filters
         ]);
     }
 
     public function detalhes($id)
     {
-        $licitacao = $this->licitacaoRepo->findWithOrgaoAndInsight($id);
+        $licitacao = $this->licitacaoService->findWithOrgaoAndInsight($id);
 
         if (!$licitacao) {
             return $this->respondError('Licitação não encontrada', 404);
@@ -66,7 +64,7 @@ class LicitacaoController extends BaseController
     public function buscar()
     {
         $termo = $this->request->getGet('q');
-        $licitacoes = $this->licitacaoRepo->findByFilters(['termo' => $termo]);
+        $licitacoes = $this->licitacaoService->findByFilters(['termo' => $termo]);
 
         return $this->respondSuccess('Busca realizada', $licitacoes);
     }
@@ -74,7 +72,7 @@ class LicitacaoController extends BaseController
     public function filtrar()
     {
         $filters = $this->request->getJSON(true);
-        $licitacoes = $this->licitacaoRepo->findByFilters($filters);
+        $licitacoes = $this->licitacaoService->findByFilters($filters);
 
         return $this->respondSuccess('Filtro aplicado', $licitacoes);
     }
@@ -82,10 +80,10 @@ class LicitacaoController extends BaseController
     public function estatisticas()
     {
         $estatisticas = [
-            'gerais' => $this->licitacaoRepo->getEstatisticasGerais(),
-            'situacao' => $this->licitacaoRepo->getDistribuicaoSituacao(),
-            'modalidade' => $this->licitacaoRepo->getDistribuicaoModalidade(),
-            'orgaos' => $this->licitacaoRepo->getOrgaosMaisAtivos(),
+            'gerais' => $this->licitacaoService->getEstatisticasGerais(),
+            'situacao' => $this->licitacaoService->getDistribuicaoSituacao(),
+            'modalidade' => $this->licitacaoService->getDistribuicaoModalidade(),
+            'orgaos' => $this->licitacaoService->getOrgaosMaisAtivos(),
         ];
 
         return $this->respondSuccess('Estatísticas obtidas', $estatisticas);
@@ -94,7 +92,7 @@ class LicitacaoController extends BaseController
     public function exportarCSV()
     {
         $filters = $this->request->getGet();
-        $licitacoes = $this->licitacaoRepo->findByFilters($filters, 1000);
+        $licitacoes = $this->licitacaoService->findByFilters($filters, 1000);
 
         // Implementar exportação CSV
         return $this->respondSuccess('Exportação iniciada');

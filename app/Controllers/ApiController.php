@@ -2,37 +2,41 @@
 
 namespace App\Controllers;
 
-use App\Repositories\LicitacaoRepository;
-use App\Repositories\AlertaRepository;
-use App\Repositories\NotificacaoRepository;
+use App\Services\LicitacaoService;
+use App\Services\AlertaService;
+use App\Services\NotificacaoService;
 use App\Services\AuthService;
 
 class ApiController extends BaseController
 {
-    protected LicitacaoRepository $licitacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
-    protected AlertaRepository $alertaRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
-    protected NotificacaoRepository $notificacaoRepo; //TODO: Substituir pelo Service. Sem chamada direta a repositorio no controller. (codigo não limpo)
+    protected LicitacaoService $licitacaoService;
+    protected AlertaService $alertaService;
+    protected NotificacaoService $notificacaoService;
     protected AuthService $authService;
 
-    public function __construct(?LicitacaoRepository $licitacaoRepo=null, ?AlertaRepository $alertaRepo=null, ?NotificacaoRepository $notificacaoRepo=null, ?AuthService $authService=null)
+    public function __construct(?LicitacaoService $licitacaoService=null, ?AlertaService $alertaService=null, ?NotificacaoService $notificacaoService=null, ?AuthService $authService=null)
     {
-        $this->licitacaoRepo = $licitacaoRepo ?? new LicitacaoRepository();
-        $this->alertaRepo = $alertaRepo ?? new AlertaRepository();
-        $this->notificacaoRepo = $notificacaoRepo ?? new NotificacaoRepository();
+        $this->licitacaoService = $licitacaoService ?? new LicitacaoService();
+        $this->alertaService = $alertaService ?? new AlertaService();
+        $this->notificacaoService = $notificacaoService ?? new NotificacaoService(
+            new \App\Repositories\AlertaRepository(),
+            new \App\Repositories\NotificacaoRepository(),
+            new \App\Repositories\LicitacaoRepository()
+        );
         $this->authService = $authService ?? new AuthService(session());
     }
 
     public function licitacoes()
     {
         $filters = $this->request->getGet();
-        $licitacoes = $this->licitacaoRepo->findByFilters($filters);
+        $licitacoes = $this->licitacaoService->findByFilters($filters);
 
         return $this->respond($licitacoes);
     }
 
     public function licitacao($id)
     {
-        $licitacao = $this->licitacaoRepo->findWithOrgaoAndInsight($id);
+        $licitacao = $this->licitacaoService->findWithOrgaoAndInsight($id);
 
         if (!$licitacao) {
             return $this->respondError('Licitação não encontrada', 404);
@@ -44,10 +48,10 @@ class ApiController extends BaseController
     public function estatisticas()
     {
         $estatisticas = [
-            'gerais' => $this->licitacaoRepo->getEstatisticasGerais(),
-            'situacao' => $this->licitacaoRepo->getDistribuicaoSituacao(),
-            'modalidade' => $this->licitacaoRepo->getDistribuicaoModalidade(),
-            'orgaos' => $this->licitacaoRepo->getOrgaosMaisAtivos(),
+            'gerais' => $this->licitacaoService->getEstatisticasGerais(),
+            'situacao' => $this->licitacaoService->getDistribuicaoSituacao(),
+            'modalidade' => $this->licitacaoService->getDistribuicaoModalidade(),
+            'orgaos' => $this->licitacaoService->getOrgaosMaisAtivos(),
         ];
 
         return $this->respond($estatisticas);
@@ -58,7 +62,7 @@ class ApiController extends BaseController
         $this->authService->requireAuth();
         $user = $this->authService->getAuthenticatedUser();
 
-        $alertas = $this->alertaRepo->findByUsuario($user->id);
+        $alertas = $this->alertaService->findByUsuario($user->id);
 
         return $this->respond($alertas);
     }
@@ -71,7 +75,7 @@ class ApiController extends BaseController
         $data = $this->request->getJSON(true);
         $data['usuario_id'] = $user->id;
 
-        $id = $this->alertaRepo->create($data);
+        $id = $this->alertaService->create($data);
 
         return $this->respondSuccess('Alerta criado', ['id' => $id]);
     }
@@ -81,7 +85,7 @@ class ApiController extends BaseController
         $this->authService->requireAuth();
         $user = $this->authService->getAuthenticatedUser();
 
-        $notificacoes = $this->notificacaoRepo->findByUsuario($user->id);
+        $notificacoes = $this->notificacaoService->findByUsuario($user->id);
 
         return $this->respond($notificacoes);
     }
