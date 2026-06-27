@@ -51,7 +51,19 @@ abstract class BaseRepository
      */
     public function create(array $data): int
     {
-        return (int) $this->model->insert($data);
+        $id = $this->model->insert($data);
+        if ($id === false) {
+            $errors = $this->model->errors();
+            throw new \Exception("Falha ao inserir registro: " . json_encode($errors));
+        }
+        
+        // Em alguns bancos/configurações, insert retorna true em vez do ID se o driver não suportar, 
+        // mas no CI4 MySQLi ele retorna o insert ID. Vamos garantir que temos um ID válido.
+        if ($id === true || $id === 0) {
+            $id = $this->model->getInsertID();
+        }
+
+        return (int) $id;
     }
 
     /**

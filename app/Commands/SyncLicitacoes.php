@@ -15,7 +15,7 @@ class SyncLicitacoes extends BaseCommand
 
     public function run(array $params = [])
     {
-        $dias = !empty($params[0]) ? (int)$params[0] : 7;
+        $dias = !empty($params[0]) ? (int)$params[0] : 30;
 
         CLI::write("Iniciando sincronização de licitações (últimos {$dias} dias)...", 'yellow');
 

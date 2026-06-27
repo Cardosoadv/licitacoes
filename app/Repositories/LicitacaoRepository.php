@@ -85,7 +85,7 @@ class LicitacaoRepository extends BaseRepository
         return $this->model->where('codigo_pncp', $codigo)->set($data)->update();
     }
 
-    public function findByCodigoPNCP(string $codigo): array
+    public function findByCodigoPNCP(string $codigo): array|null
     {
         return $this->model->where('codigo_pncp', $codigo)->first();
     }

@@ -11,7 +11,7 @@ class OrgaoModel extends Model
     protected $allowedFields = ['cnpj', 'nome', 'nome_resumido', 'esfera', 'poder', 'uf', 'municipio'];
     protected $useTimestamps = true;
     protected $validationRules = [
-        'cnpj' => 'required|exact_length[18]',
+        'cnpj' => 'required|max_length[18]',
         'nome' => 'required',
     ];
 

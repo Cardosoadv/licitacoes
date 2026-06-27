@@ -64,16 +64,29 @@ class PNCPClientService
                     $headers['Authorization'] = 'Bearer ' . $token; 
                 }
 
+                log_message('info', "PNCP Request Endpoint: {$endpoint}, Params: " . json_encode($params));
+
                 $response = $this->httpClient->get($endpoint, [
                     'query' => $params,
                     'headers' => $headers,
                 ]);
 
-                $data = json_decode($response->getBody()->getContents(), true);
+                $responseBody = $response->getBody()->getContents();
+                log_message('info', "PNCP Response Body: " . substr($responseBody, 0, 1000) . (strlen($responseBody) > 1000 ? "..." : ""));
+
+                $data = json_decode($responseBody, true);
                 
                 // Se for consulta, os resultados estão em 'data'
-                return $data['data'] ?? $data;
+                $result = $data['data'] ?? $data;
+                log_message('info', "PNCP Request decoded result count: " . (is_array($result) ? count($result) : 'not array'));
+                
+                return $result;
             } catch (RequestException $e) {
+                log_message('error', "PNCP Request Error: " . $e->getMessage());
+                if ($e->hasResponse()) {
+                    log_message('error', "PNCP Response Error Body: " . $e->getResponse()->getBody()->getContents());
+                }
+                
                 $retries++;
                 if ($retries >= $maxRetries) {
                     throw $e;

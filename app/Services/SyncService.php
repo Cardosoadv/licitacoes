@@ -49,7 +49,12 @@ class SyncService
 
             foreach ($modalidates as $modalidade) {
                 try {
+                    log_message('info', "Iniciando busca no PNCP. Modalidade: {$modalidade}, Período: {$dataInicio} a {$dataFim}");
+                    
                     $licitacoes = $this->pncpClient->buscarLicitacoesPorPeriodo($dataInicio, $dataFim, $modalidade);
+                    
+                    log_message('info', "Busca concluída. " . count($licitacoes) . " licitações encontradas para a modalidade {$modalidade}");
+                    
                     $totalBuscados += count($licitacoes);
 
                     foreach ($licitacoes as $licitacaoData) {
@@ -57,11 +62,13 @@ class SyncService
                             $this->processarLicitacao($licitacaoData);
                             $totalNovos++;
                         } catch (\Exception $e) {
+                            log_message('error', "Erro ao processar licitação: " . $e->getMessage() . " Dados: " . json_encode($licitacaoData));
                             $totalErros++;
                         }
                     }
                 } catch (\Exception $e) {
                     // Logar erro da modalidade mas continuar com as outras
+                    log_message('error', "Erro na modalidade {$modalidade}: " . $e->getMessage());
                     $this->syncRepo->logError($syncId, "Erro na modalidade {$modalidade}: " . $e->getMessage());
                     $totalErros++;
                 }
@@ -94,8 +101,8 @@ class SyncService
             'codigo_pncp'        => $codigoPNCP,
             'objeto'             => $licitacaoData['objetoCompra'] ?? $licitacaoData['objeto'] ?? '',
             'modalidade'         => $licitacaoData['modalidadeNome'] ?? '',
-            'situacao'           => $licitacaoData['situacaoNome'] ?? '',
-            'data_publicacao'    => $licitacaoData['dataPublicacao'] ?? null,
+            'situacao'           => $licitacaoData['situacaoCompraNome'] ?? $licitacaoData['situacaoNome'] ?? 'Não informada',
+            'data_publicacao'    => $licitacaoData['dataPublicacaoPncp'] ?? $licitacaoData['dataPublicacao'] ?? $licitacaoData['dataInclusao'] ?? date('Y-m-d H:i:s'),
             'data_abertura'      => $licitacaoData['dataAberturaProposta'] ?? null,
             'data_encerramento'  => $licitacaoData['dataEncerramentoProposta'] ?? null,
             'valor_estimado'     => $licitacaoData['valorTotalEstimado'] ?? 0,
@@ -111,6 +118,9 @@ class SyncService
             'nome' => $licitacaoData['orgaoEntidade']['razaoSocial'] ?? 'Órgão Desconhecido',
         ];
         $orgao = $this->orgaoRepo->findOrCreate($orgaoData);
+        if (!$orgao) {
+            throw new \Exception("Não foi possível salvar ou encontrar o órgão com CNPJ: {$cnpj}");
+        }
 
         // Salvar ou atualizar licitação
         $licitacaoExistente = $this->licitacaoRepo->findByCodigoPNCP($codigoPNCP);
@@ -124,9 +134,10 @@ class SyncService
 
         // Gerar insight (se houver serviço de LLM configurado)
         try {
-            $this->insightService->gerarInsight($codigoPNCP, $dadosFormatados, $orgaoData);
+            $this->insightService->gerarInsight((int)$licitacaoId, $dadosFormatados, $orgaoData);
         } catch (\Exception $e) {
             // Logar erro mas não interromper a sincronização
+            log_message('error', "Erro ao gerar insight para licitação ID {$licitacaoId}: " . $e->getMessage());
         }
 
         // Verificar alertas

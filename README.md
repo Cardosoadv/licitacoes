@@ -1,4 +1,4 @@
-# Petys — Sistema de Gestão Veterinária (v1.0.2)
+# Petys — Sistema de Gestão Veterinária (v1.0.3)
 
 **Petys** é um sistema moderno de gestão para clínicas e pet shops, focado em experiência do usuário, controle clínico e gestão financeira. Desenvolvido em CodeIgniter 4 com arquitetura MVCRS.
 

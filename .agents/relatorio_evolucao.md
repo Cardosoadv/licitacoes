@@ -80,3 +80,15 @@
 - **Limpeza de Controllers:** Resolvidos os "TODOs" (código não limpo) removendo o acesso direto a repositórios nos controllers.
 - **Atualização de Dependências:** `AlertaController`, `LicitacaoController`, `ApiController` e `NotificacaoController` passaram a injetar e utilizar Serviços em vez de Repositórios.
 - **Atualização de Versão:** Versão do sistema atualizada para `v1.0.2` em `README.md` e `composer.json`.
+
+## Integração com PNCP (v1.0.3)
+- **Logs Detalhados na Integração:** Foram adicionados logs robustos via `log_message` no `PNCPClientService` para registrar a URL da requisição, os parâmetros de filtro e o corpo de resposta ou erros da API do PNCP.
+- **Logs de Sincronização:** Inclusão de logs informativos no `SyncService` detalhando a busca iterativa por modalidade de licitação, bem como tratamento e registro de erros durante o parseamento da API.
+- **Correções de Tipagem e Validação:**
+    - Ajustado o retorno de `OrgaoRepository::findOrCreate` (para `array|null`) e `LicitacaoRepository::findByCodigoPNCP` (para `array|null`).
+    - Flexibilizada a regra de validação do CNPJ no `OrgaoModel` para `max_length[18]`, evitando falhas de validação quando o PNCP retorna CNPJs com apenas 14 caracteres numéricos (sem máscara).
+- **Tratamento de Erros e Constraints:** Ajustado o método genérico `create` em `BaseRepository` para lançar uma `Exception` detalhada quando o `insert()` falha (ex: erro de validação). Anteriormente, a falha retornava `0` como ID, o que encadeava uma quebra de `FOREIGN KEY` (id=0) ao tentar salvar a tabela dependente `insights_licitacoes`. Agora o erro é capturado e os demais processamentos prosseguem normalmente.
+- **Correção de Argumentos:** Ajustada a passagem de parâmetro em `SyncService::processarLicitacao()` para enviar o ID correto (`$licitacaoId`, inteiro) para o `InsightService::gerarInsight()`, ao invés do código em string.
+- **Mapeamento de Dados da API:** Corrigido o mapeamento do campo de situação no `SyncService`. A API do PNCP (V1) retorna a situação sob a chave `situacaoCompraNome`, enquanto o sistema esperava `situacaoNome`. O campo de data de publicação também foi ajustado de `dataPublicacao` para `dataPublicacaoPncp` (ou `dataInclusao`). Adicionados fallbacks seguros para evitar quebras de validação por campos nulos.
+- **Objetivo da Correção:** Facilitar a depuração e corrigir quebras silenciosas ou travamentos (`TypeError`, `Foreign Key Constraint`, erros de validação) no recebimento e processamento de editais.
+- **Atualização de Versão:** Versão do sistema atualizada para `v1.0.3` em `README.md` e `composer.json`.

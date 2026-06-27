@@ -18,7 +18,7 @@ class OrgaoRepository extends BaseRepository
         return $this->model->findByCNPJ($cnpj);
     }
 
-    public function findOrCreate(array $data): int|string
+    public function findOrCreate(array $data): array|null
     {
         return $this->model->findOrCreate($data);
     }
